@@ -25,7 +25,6 @@ struct Patient {
         return "NORMAL";
     }
 };
-
 // Helper to get current time as string
 string currentTime() {
     time_t now = time(0);
@@ -35,8 +34,6 @@ string currentTime() {
 }
 
 //  1. LINKED LIST — Patient Registry
-//     Stores all registered patients
-
 struct LLNode {
     Patient data;
     LLNode* next;
@@ -59,7 +56,7 @@ public:
         }
         count++;
     }
-
+//remove patient by ID, returns true if removed, false if not found
     bool remove(int id) {
         if (!head) return false;
         if (head->data.id == id) {
@@ -79,7 +76,7 @@ public:
         count--;
         return true;
     }
-
+//search patient by ID, returns pointer to patient or nullptr if not found  
     Patient* search(int id) {
         LLNode* cur = head;
         while (cur) {
@@ -95,7 +92,7 @@ public:
             return;
         }
         cout << "  " << left
-             << setw(6)  << "ID"
+             << setw(6)  << "ID"   
              << setw(20) << "Name"
              << setw(5)  << "Age"
              << setw(18) << "Disease"
@@ -128,11 +125,8 @@ public:
     }
 };
 
-// ─────────────────────────────────────────────
 //  2. PRIORITY QUEUE — Patient Waiting Line
-//     Uses a simple linked-list-backed priority queue
 //     Lower priority number = served first
-// ─────────────────────────────────────────────
 struct QNode {
     Patient data;
     QNode* next;
@@ -213,10 +207,8 @@ public:
     }
 };
 
-// ─────────────────────────────────────────────
 //  3. STACK — Treatment History / Undo
 //     Tracks recently served patients (LIFO)
-// ─────────────────────────────────────────────
 struct SNode {
     Patient data;
     SNode* next;
