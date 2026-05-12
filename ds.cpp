@@ -164,7 +164,7 @@ public:
         count--;
         return p;
     }
-
+//Shows first patient without removing
     Patient peek() const {
         if (!front) throw runtime_error("Queue is empty!");
         return front->data;
@@ -172,7 +172,7 @@ public:
 
     bool isEmpty() const { return front == nullptr; }
     int  size()    const { return count; }
-
+//show all wating patients in order of priority and arrival
     void display() const {
         if (!front) {
             cout << "  [Queue is empty]\n";
@@ -280,10 +280,9 @@ public:
     }
 };
 
-// ─────────────────────────────────────────────
 //  4. BST — Patient Search Tree by ID
 //     Fast lookup, insertion, in-order display
-// ─────────────────────────────────────────────
+
 struct BSTNode {
     Patient data;
     BSTNode* left;
@@ -336,7 +335,7 @@ class PatientBST {
         }
         return node;
     }
-
+//In-order traversal to display patients sorted by ID.Because inorder traversal = assending order for bst
     void inorder(BSTNode* node) const {
         if (!node) return;
         inorder(node->left);
@@ -388,9 +387,9 @@ public:
     ~PatientBST() { destroy(root); }
 };
 
-// ─────────────────────────────────────────────
+// ──────────────────────────────────────
 //  DISPLAY HELPERS
-// ─────────────────────────────────────────────
+// ──────────────────────────────────────
 void printHeader(const string& title) {
     cout << "\n  \n";
     cout << "   " << left << setw(42) << title << "\n";
@@ -402,23 +401,27 @@ void printSeparator() {
 }
 
 void printMenu() {
-    cout << "\n";
-    cout << "  \n";
-    cout << "         HOSPITAL PATIENT MANAGEMENT SYSTEM         \n";
-    cout << "  \n";
-    cout << "    [1]  Register New Patient                       \n";
-    cout << "    [2]  Add Patient to Waiting Queue               \n";
-    cout << "    [3]  Serve Next Patient (Dequeue)               \n";
-    cout << "    [4]  View Patient Queue                         \n";
-    cout << "    [5]  View All Registered Patients (Linked List) \n";
-    cout << "    [6]  Search Patient by ID (BST)                 \n";
-    cout << "    [7]  View BST (Sorted by ID)                    \n";
-    cout << "    [8]  View Treatment History (Stack)             \n";
-    cout << "    [9]  Undo Last Treatment (Stack Pop)            \n";
-    cout << "    [10] Remove Patient from Registry               \n";
-    cout << "    [0]  Exit                                       \n";
-    cout << "  \n";
-    cout << "  Enter choice: ";
+    cout << " \t\t\t|===================================================|\n";
+    cout << " \t\t\t|                                                   |\n"; 
+    cout << " \t\t\t|        HOSPITAL PATIENT MANAGEMENT SYSTEM         |\n";
+    cout << " \t\t\t|                                                   |\n";
+    cout << " \t\t\t|===================================================| \n";
+    cout << " \t\t\t|                                                   |\n";
+    cout << " \t\t\t|  [1]  Register New Patient                        |\n";
+    cout << " \t\t\t|  [2]  Add Patient to Waiting Queue                |\n";
+    cout << " \t\t\t|  [3]  Serve Next Patient (Dequeue)                |\n";
+    cout << " \t\t\t|  [4]  View Patient Queue                          |\n";
+    cout << " \t\t\t|  [5]  View All Registered Patients (Linked List)  |\n";
+    cout << " \t\t\t|  [6]  Search Patient by ID (BST)                  |\n";
+    cout << " \t\t\t|  [7]  View BST (Sorted by ID)                     |\n";
+    cout << " \t\t\t|  [8]  View Treatment History (Stack)              |\n";
+    cout << " \t\t\t|  [9]  Undo Last Treatment (Stack Pop)             |\n";
+    cout << " \t\t\t|  [10] Remove Patient from Registry                |\n";
+    cout << " \t\t\t|  [0]  Exit                                        |\n";
+    cout << " \t\t\t|                                                   |\n";
+    cout << " \t\t\t|===================================================| \n";
+    cout << " \t\t\t                                                      \n";
+    cout << " \t\t\t Enter choice: ";
 }
 
 // ─────────────────────────────────────────────
@@ -473,7 +476,7 @@ int main() {
             registry.insert(p);
             bst.insert(p);
 
-            cout << "\n  ✔ Patient registered successfully!\n";
+            cout << "\n    Patient registered successfully!\n";
             cout << "  Assigned ID: " << p.id << " | Priority: " << p.priorityLabel() << "\n";
 
         } else if (choice == 2) {
@@ -488,7 +491,7 @@ int main() {
                 cout << "\n  [!] Patient ID " << id << " not found in registry.\n";
             } else {
                 waitingQueue.enqueue(*p);
-                cout << "\n  ✔ " << p->name << " added to waiting queue.\n";
+                cout << "\n    " << p->name << " added to waiting queue.\n";
                 cout << "  Queue position depends on priority (" << p->priorityLabel() << ").\n";
             }
 
@@ -500,7 +503,7 @@ int main() {
             } else {
                 Patient served = waitingQueue.dequeue();
                 treatmentHistory.push(served);
-                cout << "\n  ✔ Now serving:\n";
+                cout << "\n   Now serving:\n";
                 cout << "    ID      : " << served.id       << "\n";
                 cout << "    Name    : " << served.name     << "\n";
                 cout << "    Age     : " << served.age      << "\n";
@@ -532,7 +535,7 @@ int main() {
             if (!p) {
                 cout << "\n  [!] Patient with ID " << id << " not found.\n";
             } else {
-                cout << "\n  ✔ Patient Found:\n";
+                cout << "\n    Patient Found:\n";
                 cout << "    ID      : " << p->id       << "\n";
                 cout << "    Name    : " << p->name     << "\n";
                 cout << "    Age     : " << p->age      << "\n";
@@ -561,8 +564,8 @@ int main() {
             } else {
                 Patient undone = treatmentHistory.pop();
                 waitingQueue.enqueue(undone);
-                cout << "\n  ✔ Treatment of " << undone.name << " (ID: " << undone.id << ") undone.\n";
-                cout << "  Patient has been re-added to the waiting queue.\n";
+                cout << "\n    Treatment of " << undone.name << " (ID: " << undone.id << ") undone.\n";
+                cout << "    Patient has been re-added to the waiting queue.\n";
             }
 
         } else if (choice == 10) {
@@ -575,7 +578,7 @@ int main() {
             bool removed = registry.remove(id);
             if (removed) {
                 bst.remove(id);
-                cout << "\n  ✔ Patient ID " << id << " removed from registry and BST.\n";
+                cout << "\n    Patient ID " << id << " removed from registry and BST.\n";
             } else {
                 cout << "\n  [!] Patient ID " << id << " not found.\n";
             }
@@ -590,7 +593,7 @@ int main() {
         }
 
     } while (choice != 0);
-
+    
     cout << "\n   Thank you for using Hospital Management System. Goodbye!\n\n";
     return 0;
 }
