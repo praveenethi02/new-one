@@ -426,9 +426,11 @@ void printSeparator() {
 
 void printMenu() {
     cout << " \t\t\t|===================================================|\n";
+    cout << " \t\t\t|===================================================|\n";
     cout << " \t\t\t|                                                   |\n";
     cout << " \t\t\t|        HOSPITAL PATIENT MANAGEMENT SYSTEM         |\n";
     cout << " \t\t\t|                                                   |\n";
+    cout << " \t\t\t|===================================================|\n";
     cout << " \t\t\t|===================================================| \n";
     cout << " \t\t\t|                                                   |\n";
     cout << " \t\t\t|  [1]  Register New Patient                        |\n";
