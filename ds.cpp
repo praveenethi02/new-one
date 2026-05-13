@@ -3,7 +3,26 @@
 #include <iomanip>
 #include <ctime>
 #include <sstream>
+#include <limits>
 using namespace std;
+
+// ─────────────────────────────────────────────
+//  INPUT HELPER — prevents infinite loop on bad input
+// ─────────────────────────────────────────────
+int getInt(const string& prompt) {
+    int value;
+    while (true) {
+        cout << prompt;
+        cin >> value;
+        if (cin.good()) {
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            return value;
+        }
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << "  [!] Invalid input. Please enter a number.\n";
+    }
+}
 
 //  PATIENT STRUCTURE
 
@@ -25,6 +44,7 @@ struct Patient {
         return "NORMAL";
     }
 };
+
 // Helper to get current time as string
 string currentTime() {
     time_t now = time(0);
@@ -56,7 +76,7 @@ public:
         }
         count++;
     }
-//remove patient by ID, returns true if removed, false if not found
+
     bool remove(int id) {
         if (!head) return false;
         if (head->data.id == id) {
@@ -76,7 +96,7 @@ public:
         count--;
         return true;
     }
-//search patient by ID, returns pointer to patient or nullptr if not found  
+
     Patient* search(int id) {
         LLNode* cur = head;
         while (cur) {
@@ -92,7 +112,7 @@ public:
             return;
         }
         cout << "  " << left
-             << setw(6)  << "ID"   
+             << setw(6)  << "ID"
              << setw(20) << "Name"
              << setw(5)  << "Age"
              << setw(18) << "Disease"
@@ -141,7 +161,6 @@ public:
 
     void enqueue(Patient p) {
         QNode* node = new QNode(p);
-        // Insert by priority (1 first), then FIFO within same priority
         if (!front || p.priority < front->data.priority) {
             node->next = front;
             front = node;
@@ -164,7 +183,7 @@ public:
         count--;
         return p;
     }
-//Shows first patient without removing
+
     Patient peek() const {
         if (!front) throw runtime_error("Queue is empty!");
         return front->data;
@@ -172,7 +191,7 @@ public:
 
     bool isEmpty() const { return front == nullptr; }
     int  size()    const { return count; }
-//show all wating patients in order of priority and arrival
+
     void display() const {
         if (!front) {
             cout << "  [Queue is empty]\n";
@@ -280,8 +299,8 @@ public:
     }
 };
 
-//  4. BST — Patient Search Tree by ID
-//     Fast lookup, insertion, in-order display
+//  4. BST — Patient Search Tree keyed by PRIORITY (then ID as tiebreaker)
+//     In-order traversal yields: Emergency -> Urgent -> Normal
 
 struct BSTNode {
     Patient data;
@@ -293,33 +312,35 @@ struct BSTNode {
 class PatientBST {
     BSTNode* root;
 
+    // Insert keyed on priority, ID as tiebreaker
     BSTNode* insert(BSTNode* node, Patient p) {
         if (!node) return new BSTNode(p);
-        if (p.id < node->data.id)
+        bool goLeft = (p.priority < node->data.priority) ||
+                      (p.priority == node->data.priority && p.id < node->data.id);
+        if (goLeft)
             node->left  = insert(node->left, p);
-        else if (p.id > node->data.id)
+        else
             node->right = insert(node->right, p);
         return node;
     }
 
+    // Search by ID — full traversal since key is priority, not ID   //function header
     BSTNode* search(BSTNode* node, int id) {
-        if (!node || node->data.id == id) return node;
-        if (id < node->data.id) return search(node->left, id);
-        return search(node->right, id);
+        if (!node) return nullptr;                    //base function
+        if (node->data.id == id) return node;
+        BSTNode* found = search(node->left, id);
+        return found ? found : search(node->right, id);
     }
 
-    BSTNode* findMin(BSTNode* node) {
+    BSTNode* findMin(BSTNode* node) {      //find the min value in the node
         while (node->left) node = node->left;
         return node;
     }
 
+    // Remove by ID — full traversal since key is priority, not ID
     BSTNode* remove(BSTNode* node, int id) {
         if (!node) return nullptr;
-        if (id < node->data.id)
-            node->left  = remove(node->left, id);
-        else if (id > node->data.id)
-            node->right = remove(node->right, id);
-        else {
+        if (node->data.id == id) {
             if (!node->left) {
                 BSTNode* tmp = node->right;
                 delete node;
@@ -332,10 +353,14 @@ class PatientBST {
             BSTNode* mn = findMin(node->right);
             node->data = mn->data;
             node->right = remove(node->right, mn->data.id);
+        } else {
+            node->left  = remove(node->left,  id);
+            node->right = remove(node->right, id);
         }
         return node;
     }
-//In-order traversal to display patients sorted by ID.Because inorder traversal = assending order for bst
+
+    // In-order traversal = ascending priority = Emergency first
     void inorder(BSTNode* node) const {
         if (!node) return;
         inorder(node->left);
@@ -372,7 +397,7 @@ public:
             cout << "  [BST is empty]\n";
             return;
         }
-        cout << "  (Sorted by Patient ID — In-Order Traversal)\n";
+        cout << "  (Sorted by Priority — Emergency first, then Urgent, then Normal)\n";
         cout << "  " << left
              << setw(6)  << "ID"
              << setw(20) << "Name"
@@ -387,9 +412,8 @@ public:
     ~PatientBST() { destroy(root); }
 };
 
-// ──────────────────────────────────────
+
 //  DISPLAY HELPERS
-// ──────────────────────────────────────
 void printHeader(const string& title) {
     cout << "\n  \n";
     cout << "   " << left << setw(42) << title << "\n";
@@ -402,7 +426,7 @@ void printSeparator() {
 
 void printMenu() {
     cout << " \t\t\t|===================================================|\n";
-    cout << " \t\t\t|                                                   |\n"; 
+    cout << " \t\t\t|                                                   |\n";
     cout << " \t\t\t|        HOSPITAL PATIENT MANAGEMENT SYSTEM         |\n";
     cout << " \t\t\t|                                                   |\n";
     cout << " \t\t\t|===================================================| \n";
@@ -413,7 +437,7 @@ void printMenu() {
     cout << " \t\t\t|  [4]  View Patient Queue                          |\n";
     cout << " \t\t\t|  [5]  View All Registered Patients (Linked List)  |\n";
     cout << " \t\t\t|  [6]  Search Patient by ID (BST)                  |\n";
-    cout << " \t\t\t|  [7]  View BST (Sorted by ID)                     |\n";
+    cout << " \t\t\t|  [7]  Sorted by Priority                          |\n";
     cout << " \t\t\t|  [8]  View Treatment History (Stack)              |\n";
     cout << " \t\t\t|  [9]  Undo Last Treatment (Stack Pop)             |\n";
     cout << " \t\t\t|  [10] Remove Patient from Registry                |\n";
@@ -452,8 +476,8 @@ int main() {
     int choice;
     do {
         printMenu();
-        cin >> choice;
-        cin.ignore();
+        cin.clear();
+        choice = getInt("");
 
         if (choice == 1) {
             // ── Register New Patient ─────────
@@ -462,10 +486,10 @@ int main() {
             int age, priority;
 
             cout << "\n  Name    : "; getline(cin, name);
-            cout << "  Age     : "; cin >> age; cin.ignore();
             cout << "  Disease : "; getline(cin, disease);
-            cout << "  Priority (1=Emergency, 2=Urgent, 3=Normal): ";
-            cin >> priority; cin.ignore();
+
+            age      = getInt("  Age     : ");
+            priority = getInt("  Priority (1=Emergency, 2=Urgent, 3=Normal): ");
 
             if (priority < 1 || priority > 3) {
                 cout << "\n  [!] Invalid priority. Defaulting to Normal.\n";
@@ -482,9 +506,7 @@ int main() {
         } else if (choice == 2) {
             // ── Enqueue Patient ──────────────
             printHeader("ADD PATIENT TO QUEUE");
-            int id;
-            cout << "\n  Enter Patient ID: ";
-            cin >> id; cin.ignore();
+            int id = getInt("\n  Enter Patient ID: ");
 
             Patient* p = registry.search(id);
             if (!p) {
@@ -527,26 +549,24 @@ int main() {
         } else if (choice == 6) {
             // ── BST Search ───────────────────
             printHeader("SEARCH PATIENT BY ID (BST)");
-            int id;
-            cout << "\n  Enter Patient ID: ";
-            cin >> id; cin.ignore();
+            int id = getInt("\n  Enter Patient ID: ");
 
             Patient* p = bst.search(id);
             if (!p) {
                 cout << "\n  [!] Patient with ID " << id << " not found.\n";
             } else {
                 cout << "\n    Patient Found:\n";
-                cout << "    ID      : " << p->id       << "\n";
-                cout << "    Name    : " << p->name     << "\n";
-                cout << "    Age     : " << p->age      << "\n";
-                cout << "    Disease : " << p->disease  << "\n";
+                cout << "    ID      : " << p->id        << "\n";
+                cout << "    Name    : " << p->name      << "\n";
+                cout << "    Age     : " << p->age       << "\n";
+                cout << "    Disease : " << p->disease   << "\n";
                 cout << "    Priority: " << p->priorityLabel() << "\n";
                 cout << "    Added   : " << p->timeAdded << "\n";
             }
 
         } else if (choice == 7) {
-            // ── BST Display ──────────────────
-            printHeader("BST — PATIENTS SORTED BY ID");
+            // ── BST Display (sorted by priority) ──
+            printHeader("BST — PATIENTS SORTED BY PRIORITY");
             cout << "\n";
             bst.display();
 
@@ -571,9 +591,7 @@ int main() {
         } else if (choice == 10) {
             // ── Remove Patient ───────────────
             printHeader("REMOVE PATIENT FROM REGISTRY");
-            int id;
-            cout << "\n  Enter Patient ID to remove: ";
-            cin >> id; cin.ignore();
+            int id = getInt("\n  Enter Patient ID to remove: ");
 
             bool removed = registry.remove(id);
             if (removed) {
@@ -593,7 +611,7 @@ int main() {
         }
 
     } while (choice != 0);
-    
+
     cout << "\n   Thank you for using Hospital Management System. Goodbye!\n\n";
     return 0;
 }
